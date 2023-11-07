@@ -1,0 +1,40 @@
+public function index(){
+ $id = Auth::User()->id;
+ $ua = User::findOrFail($id);
+ $anak = DB::select(DB::raw('
+  SELECT id, email, nama, jk, anakKe, tglLahir, agama
+  FROM user
+  WHERE ayah = :email
+  GROUP BY id, email, nama, jk, anakKe, tglLahir, agama
+ '), ['email' => $ua->email]);
+ return view('warga.anak.index', compact('anak', 'ua'));
+}
+public function create(){
+ return view('warga.anak.create');
+}
+public function show($id){
+ $warga = User::findOrFail($id);
+ $ortu = DB::table('user AS u')
+  ->select('u.id AS id', 'u.nama AS nama', 'u.ayah AS nikAyah', 'ayah.nama AS namaAyah', 'u.ibu AS nikIbu','ibu.nama AS namaIbu')
+  ->leftJoin('user AS ayah', 'u.ayah', '=', 'ayah.email')
+  ->leftJoin('user AS ibu', 'u.ibu', '=', 'ibu.email')
+  ->where('u.id', '=', $id)
+  ->first();
+ return view('warga.anak.show', compact('warga', 'ortu'));
+}
+public function edit($id){
+ $warga = User::findOrFail($id);
+ $ayah = DB::select(DB::raw('
+  SELECT id, nama, email
+  FROM user
+  WHERE role = 0
+  AND jk = "L"
+ '));
+ $ibu = DB::select(DB::raw('
+  SELECT id, nama, email
+  FROM user
+  WHERE role = 0
+  AND jk = "P"
+ '));
+ return view('warga.anak.edit', compact('warga', 'ayah', 'ibu'));
+}

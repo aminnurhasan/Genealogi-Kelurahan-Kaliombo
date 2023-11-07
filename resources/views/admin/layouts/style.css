@@ -1,0 +1,7 @@
+.hovring img {
+    display: none;
+}
+
+.hovring:hover img {
+    display: block;
+}
